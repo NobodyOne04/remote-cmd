@@ -66,3 +66,7 @@ stdout ◄─┼── out ◄── conn (read)  ◄────────┼
 make check     # gofmt, go vet, race-enabled tests
 make test      # tests only
 ```
+
+## Decisions
+
+Why it is built this way: [docs/adr](docs/adr/README.md).
