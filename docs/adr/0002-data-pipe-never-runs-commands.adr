@@ -1,0 +1,27 @@
+# 0002. A data-only TCP pipe; it never runs commands
+
+- Status: Accepted
+- Date: 2026-11-19
+
+The tool connects stdin/stdout to one TCP connection and copies bytes both ways. It replaced
+the 2019 version, which bound a shell to a socket, and it must never execute what it receives.
+
+## Technical details
+- **History**: the first version (`v1`, 2019) was a Go exercise that exposed a shell over
+  TCP: anyone who could reach the port could run commands. On 2026-11-07 it was rewritten as
+  `tcp-pipe`, keeping the learning goals (`net`, goroutines, `io.Copy`, `context`
+  cancellation, flags, error handling) without the remote-execution hole.
+- **Modes**: `tcp-pipe host:port` dials (timeout `-timeout`, default 10 s);
+  `tcp-pipe -l host:port` listens and accepts exactly one connection, printing the listen
+  address and the peer to stderr.
+- **Uses**: interactive two-way text, or file transfer with redirection
+  (`-l :9090 > got.bin` / `host:9090 < send.bin`).
+- **Signals**: `Ctrl-C` / `SIGTERM` cancel a context; a goroutine closes the listener or the
+  connection so a blocked `Accept` or copy returns, and the exit is clean.
+- **Errors**: `-h` exits 0; a wrong argument count prints usage and fails; any error is
+  printed as `tcp-pipe: …` with exit code 1.
+
+## Technologies and alternatives
+- Involved: Go 1.24 standard library only (`net`, `io`, `context`, `os/signal`, `flag`).
+- Alternatives: keep the remote shell (a security hole by design); add TLS or auth (beyond a
+  learning tool; use ssh for that); use netcat (the point is writing it).

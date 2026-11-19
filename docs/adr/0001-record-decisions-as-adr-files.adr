@@ -1,0 +1,22 @@
+# 0001. Record architecture decisions as .adr files
+
+- Status: Accepted
+- Date: 2026-11-19
+
+Decisions behind this project are recorded as numbered `.adr` files in `docs/adr/`, the same
+way as in the owner's other repos, so the why lives next to the code.
+
+## Technical details
+- **Files**: `docs/adr/NNNN-short-title.adr`: sequential four-digit numbers, never reused;
+  Markdown content with the `.adr` extension. `docs/adr/README.md` is the index.
+- **Format**: the `adr-manager` template (title, Status, Date, purpose, Technical details,
+  Technologies and alternatives). Statuses: Proposed, Accepted, Rejected, Deprecated,
+  Superseded (linked both ways).
+- **History**: the other ADRs here were recorded retroactively on 2026-11-19 from the code,
+  README and git history, and accepted by the owner in bulk.
+- **Commits**: subjects carry the ADR they fall under (`[ADR-NNNN]`, minor changes
+  `[ADR-NNNN.N]`); `CLAUDE.md` says to read the ADR before changing a recorded decision.
+
+## Technologies and alternatives
+- Alternatives: no records (the why is lost); decisions in the README (mixed with usage
+  docs, no status); `.md` extension (ADRs can't be told apart from other docs).

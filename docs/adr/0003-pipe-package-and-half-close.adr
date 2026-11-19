@@ -1,0 +1,26 @@
+# 0003. A small pipe package on io interfaces, with half-close on EOF
+
+- Status: Accepted
+- Date: 2026-11-19
+
+The copying lives in `internal/pipe`, which knows nothing about flags, signals or how the
+connection was made, so it is small and testable without a network.
+
+## Technical details
+- **`pipe.Join(ctx, conn io.ReadWriter, in io.Reader, out io.Writer)`** runs both
+  directions in goroutines:
+  - `in → conn`: when local input hits EOF and `conn` has `CloseWrite()` (as `*net.TCPConn`
+    does), only the write half is closed, so the peer sees EOF but can still answer.
+  - `conn → out`: Join returns when this direction ends (the peer is done) or `ctx` is
+    cancelled. It deliberately doesn't wait for `in → conn`, because `os.Stdin` can block
+    forever; the caller closing `conn` unblocks it so nothing leaks.
+- **`copyData`** is `io.Copy` that treats `io.EOF` and `net.ErrClosed` (closing from another
+  goroutine) as a normal end.
+- **Testability**: `main.run()` takes `ctx`, args and the three streams and returns an error
+  instead of exiting; tests (`main_test.go`, `internal/pipe/pipe_test.go`) use `net.Pipe` and
+  loopback, run with `-race` in `make check` (also `gofmt -l` and `go vet`).
+
+## Technologies and alternatives
+- Alternatives: one `io.Copy` per direction in `main` (untestable without a process); closing
+  the whole connection on input EOF (the peer's reply would be lost); waiting on both
+  directions (hangs on stdin).
